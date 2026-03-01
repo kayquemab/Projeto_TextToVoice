@@ -4,12 +4,31 @@ let voices = [];
 
 let voiceSelect = document.querySelector("select");
 
-window.speechSynthesis.onvoiceschanged = () => {
+// Função para popular as vozes
+function populateVoices() {
     voices = window.speechSynthesis.getVoices();
-    speech.voice = voices[0];
+    
+    if (voices.length > 0) {
+        speech.voice = voices[0];
+        voiceSelect.innerHTML = '';
+        voices.forEach((voice, i) => {
+            voiceSelect.options[i] = new Option(voice.name, i);
+        });
+    }
+}
 
-    voices.forEach((voice, i) => (voiceSelect.options[i] = new Option(voice.name, i)));
-};
+// Carrega vozes quando disponível
+window.speechSynthesis.onvoiceschanged = populateVoices;
+
+// Tenta carregar vozes imediatamente (algumas engines já carregam)
+populateVoices();
+
+// Fallback: tenta carregar novamente após 1 segundo se não tiver vozes
+setTimeout(() => {
+    if (voices.length === 0) {
+        populateVoices();
+    }
+}, 1000);
 
 voiceSelect.addEventListener("change", () => {
     speech.voice = voices[voiceSelect.value];
